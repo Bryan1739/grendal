@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da4b445817d68e249899ebaf28d5dbe8, type: 3}
+  m_Name: lluvia_flechas
+  m_EditorClassIdentifier: Assembly-CSharp::TapLegends.Progression.SkillData
+  id: lluvia_flechas
+  displayName: Lluvia de Flechas
+  kind: 1
+  damageMultiplier: 6
+  multiplierGrowthPerLevel: 1.15
+  buffDurationSeconds: 0
+  cooldownSeconds: 12
+  baseUpgradeCost: 90
+  upgradeCostGrowth: 1.16
+  iconWeapon: 1
+  iconColor: {r: 0.45, g: 0.75, b: 0.4, a: 1}
+  icon: {fileID: 0}

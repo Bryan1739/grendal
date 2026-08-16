@@ -1,0 +1,58 @@
+# Este .gitignore es para un proyecto de Unity creado con Unity Hub
+
+# Carpetas generadas por Unity
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+[Uu]ser[Ss]ettings/
+[Mm]emoryCaptures/
+
+# Archivos de Visual Studio / Rider / VS Code
+.vs/
+.vscode/
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+.idea/
+*.iml
+
+# Archivos de Unity que no deben versionarse
+*.pidb.meta
+*.pdb.meta
+*.mdb.meta
+sysinfo.txt
+*.apk
+*.aab
+*.unitypackage
+*.app
+crashlytics-build.properties
+
+# Paquetes (se restauran solos)
+/[Pp]ackages/packages-lock.json.meta
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+
+# Compilaciones archivadas localmente (ver TapLegends-Plan.md, sección MVP)
+/builds/*.apk
+/builds/*.aab
+!/builds/.gitkeep
+
+# Claves de firma — NUNCA subir esto a git
+*.keystore
+*.jks

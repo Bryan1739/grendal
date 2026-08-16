@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4828e59621817644a630e62028bd4f4, type: 3}
+  m_Name: monje_berrin
+  m_EditorClassIdentifier: Assembly-CSharp::TapLegends.Progression.HeroData
+  id: monje_berrin
+  displayName: Monje Berrin
+  baseCost: 250
+  costGrowth: 1.12
+  baseDps: 8
+  dpsGrowthMultiplier: 1.35
+  art: {fileID: 0}
+  weaponKind: 2
+  weaponTint: {r: 0.65, g: 0.4, b: 0.9, a: 1}
+  weaponIconOverride: {fileID: 0}
