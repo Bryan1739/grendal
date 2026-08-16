@@ -20,6 +20,19 @@ botín), mascotas (1 activa + 20% las demás), 5 habilidades activas, prestigio 
 
 ---
 
+## Control de versiones
+
+Repo local conectado a GitHub: `https://github.com/Bryan1739/grendal.git` (remoto
+`origin`, rama `master`). Autenticación vía Git Credential Manager (ya viene con Git for
+Windows), sin PAT manual. Primer commit (`cce1f03`, "Primer commit: Tap Legends v0.1-v0.8")
+incluye todo el proyecto hasta Etapa 8 + parte de la 9. `.gitignore` excluye `Library/`,
+`Temp/`, `Logs/`, `UserSettings/`, builds (`*.apk`/`*.aab`), keystores.
+
+Nota: `TapLegends-Plan.md` vive un nivel arriba de este repo (`../TapLegends-Plan.md`), por
+lo tanto **no** está versionado en GitHub — solo existe localmente.
+
+---
+
 ## Setup después de cambiar datos
 
 1. `Tap Legends → Setup → Create Initial Data (Bosque Quebrado)` — crea/actualiza los
