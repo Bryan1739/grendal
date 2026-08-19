@@ -25,6 +25,7 @@ namespace TapLegends.UI
             EventBus.Subscribe<LootObtainedEvent>(HandleLoot);
             EventBus.Subscribe<PetObtainedEvent>(HandlePetObtained);
             EventBus.Subscribe<AchievementUnlockedEvent>(HandleAchievementUnlocked);
+            EventBus.Subscribe<SystemUnlockedEvent>(HandleSystemUnlocked);
         }
 
         private void OnDisable()
@@ -32,6 +33,7 @@ namespace TapLegends.UI
             EventBus.Unsubscribe<LootObtainedEvent>(HandleLoot);
             EventBus.Unsubscribe<PetObtainedEvent>(HandlePetObtained);
             EventBus.Unsubscribe<AchievementUnlockedEvent>(HandleAchievementUnlocked);
+            EventBus.Unsubscribe<SystemUnlockedEvent>(HandleSystemUnlocked);
         }
 
         private void HandleLoot(LootObtainedEvent evt)
@@ -61,6 +63,14 @@ namespace TapLegends.UI
             if (panel == null || messageText == null) return;
 
             messageText.text = $"¡Logro desbloqueado!\n{evt.DisplayName}\n+{NumberFormatter.Format(evt.RewardGold)} oro";
+            Show();
+        }
+
+        private void HandleSystemUnlocked(SystemUnlockedEvent evt)
+        {
+            if (panel == null || messageText == null) return;
+
+            messageText.text = $"¡Nuevo sistema desbloqueado!\n{evt.SystemName}";
             Show();
         }
 

@@ -37,7 +37,17 @@ namespace TapLegends.Progression
         public WeaponKind iconWeapon = WeaponKind.Sword;
         public Color iconColor = new Color(1f, 0.55f, 0.2f);
 
-        [SerializeField] private Sprite icon;
+        // Publico (no [SerializeField] private) a proposito: CreateInitialData.cs (modo
+        // Editor) necesita asignarlo directo al crear el asset — mismo criterio que
+        // HeroData/PetData/WeaponSkinData.
+        public Sprite icon;
         public Sprite Icon => icon != null ? icon : PlaceholderArt.Weapon(id, iconWeapon, iconColor, 32);
+
+        // Version "grande" del mismo icono, mas detallada, para el casillero de la barra de
+        // habilidades (SkillSlotButton — se toca en pantalla durante la partida). `icon`
+        // (arriba) es la version chica para la fila de la pestaña Mejoras (SkillUpgradeButton)
+        // — el usuario proveyo 2 tamaños distintos de la misma hoja para cada uso.
+        public Sprite hotbarIcon;
+        public Sprite HotbarIcon => hotbarIcon != null ? hotbarIcon : Icon;
     }
 }

@@ -290,6 +290,45 @@ namespace TapLegends.Core
         }
 
         /// <summary>
+        /// Textura de "tajo" curvo: nucleo brillante que se afina hasta desaparecer en
+        /// las puntas, arqueado hacia arriba en el medio — para el efecto de espadazo
+        /// (ver PlayerAttackEffect). Blanco con alpha variable, se tinta con Image.color
+        /// por skin, igual que SolidPixel. Una barra recta se leia como un disparo/bala
+        /// (reportado por el usuario); esta forma se lee como un corte ancho.
+        /// </summary>
+        public static Sprite SlashArc(int width = 128, int height = 56)
+        {
+            string key = $"slash_arc::{width}x{height}";
+            if (Cache.TryGetValue(key, out var cached)) return cached;
+
+            var pixels = new Color[width * height];
+            float midY = height * 0.5f;
+            float curve = height * 0.22f;
+            float maxThickness = height * 0.34f;
+
+            for (int x = 0; x < width; x++)
+            {
+                float t = x / (float)(width - 1);
+                float taper = Mathf.Sin(t * Mathf.PI); // 0 en las puntas, 1 en el medio
+                float thickness = Mathf.Max(0.6f, maxThickness * taper);
+                float centerY = midY + curve * Mathf.Sin(t * Mathf.PI);
+
+                for (int y = 0; y < height; y++)
+                {
+                    float dist = Mathf.Abs(y - centerY);
+                    float edge = thickness * 0.5f;
+                    float alpha = dist >= edge ? 0f : Mathf.Pow(1f - dist / edge, 0.6f);
+                    alpha *= taper; // se desvanece del todo en las puntas, no solo se adelgaza
+                    pixels[y * width + x] = new Color(1f, 1f, 1f, alpha);
+                }
+            }
+
+            var sprite = BuildSprite(pixels, width, height, new Vector2(0.5f, 0.5f));
+            Cache[key] = sprite;
+            return sprite;
+        }
+
+        /// <summary>
         /// Color por id dentro de una banda alrededor del hue del rol: dos enemigos
         /// distintos se notan a simple vista, pero ambos siguen "leyendose" como su rol
         /// (comunes en rojos, jefes en morados...).

@@ -73,6 +73,7 @@ namespace TapLegends.Progression
             levels[upgrade] = GetLevel(upgrade) + 1;
             EventBus.Publish(new RelicsChangedEvent { NewTotal = Relics });
             EventBus.Publish(new PrestigeUpgradeChangedEvent { UpgradeId = upgrade.id });
+            EventBus.Publish(new UpgradePurchasedEvent());
             return true;
         }
 
@@ -88,7 +89,8 @@ namespace TapLegends.Progression
             GoldWallet.Instance?.LoadState(0d);
             PlayerStats.Instance?.LoadState(0);
             HeroRoster.Instance?.ResetAll();
-            // hasLostBossOnce tambien se reinicia: cada Renacer vuelve a mostrar el primer
+            // hasLostBossOnce tambien se reinicia (aunque vencer un jefe ya lo hace solo,
+            // ver EnemySpawner.HandleEnemyDied): cada Renacer vuelve a mostrar el primer
             // jefe (Grendal, nivel 10) en automatico, igual que la primerisima partida.
             EnemySpawner.Instance?.LoadState(1, 0, false);
 

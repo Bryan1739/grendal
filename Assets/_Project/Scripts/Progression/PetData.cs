@@ -25,7 +25,15 @@ namespace TapLegends.Progression
         public double attackDps = 0d;
         public float attackInterval = 3f;
 
-        [SerializeField] private Sprite art;
-        public Sprite Art => art != null ? art : PlaceholderArt.Creature(id, 28, CreatureRole.Pet);
+        // Publico (no [SerializeField] private) a proposito: CreateInitialData.cs (modo
+        // Editor) necesita asignarlo directo al crear el asset — mismo criterio que
+        // HeroData/WeaponSkinData.
+        public Sprite art;
+        public Sprite Art => art != null ? art : PlaceholderArt.Creature(SkinnedId, 28, CreatureRole.Pet);
+        public Sprite attackArt;
+        public Sprite AttackArt => attackArt != null ? attackArt : Art;
+
+        // Skin elegida en el Perfil (ver ProfileManager) — mismo criterio que HeroData.
+        private string SkinnedId => ProfileManager.Instance != null ? ProfileManager.Instance.ApplySkin(id) : id;
     }
 }

@@ -120,6 +120,7 @@ namespace TapLegends.Progression
 
             levels[hero] = GetLevel(hero) + 1;
             EventBus.Publish(new HeroChangedEvent { HeroId = hero.id });
+            EventBus.Publish(new UpgradePurchasedEvent());
             return true;
         }
 

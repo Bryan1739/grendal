@@ -1,4 +1,5 @@
 #if UNITY_EDITOR || DEVELOPMENT_BUILD
+using TapLegends.Combat;
 using TapLegends.Core;
 using TapLegends.Progression;
 using UnityEngine;
@@ -32,6 +33,7 @@ namespace TapLegends.DebugTools
             m => m.SetTapDamage1000(),
             m => m.ResetSave(),
             m => m.SimulateOffline1Hour(),
+            m => m.ResetBossAutoFight(),
         };
 
         private int tapCount;
@@ -88,6 +90,11 @@ namespace TapLegends.DebugTools
         }
 
         public void SimulateOffline1Hour() => GameManager.Instance?.DebugSimulateOfflineSeconds(3600f);
+
+        /// <summary>Fuerza el modo "automatico" del jefe actual sin tener que vencerlo de
+        /// verdad (vencerlo ya lo hace solo, ver EnemySpawner.HandleEnemyDied) — util para
+        /// probar el mecanismo repetidas veces rapido.</summary>
+        public void ResetBossAutoFight() => EnemySpawner.Instance?.DebugResetBossAutoFight();
     }
 }
 #endif

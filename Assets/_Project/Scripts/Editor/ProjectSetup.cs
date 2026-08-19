@@ -12,6 +12,7 @@ namespace TapLegends.EditorTools
     public static class ProjectSetup
     {
         private const string DevApplicationId = "com.taplegendsstudio.taplegends.dev";
+        private const string AppIconPath = "Assets/_Project/Art/Icons/AppIcon.png";
 
         [MenuItem("Tap Legends/Setup/Configure Android Player Settings")]
         public static void ConfigureAndroid()
@@ -33,6 +34,34 @@ namespace TapLegends.EditorTools
             PlayerSettings.colorSpace = ColorSpace.Linear;
 
             Debug.Log($"[ProjectSetup] Android configurado: {DevApplicationId}, IL2CPP, ARM64, minSdk 26.");
+        }
+
+        /// <summary>
+        /// Asigna Art/Icons/AppIcon.png como icono de Android. Usa la API "Legacy"
+        /// (SetIconsForTargetGroup), no los slots de Adaptive Icon (foreground/background
+        /// separados): el arte que tenemos es una sola imagen plana con las esquinas ya
+        /// redondeadas, no capas separadas para que Android las recorte solo. Unity usa el
+        /// Legacy icon como base para generar el ic_launcher igual, asi que alcanza para
+        /// tener icono real en el telefono ya — descomponerlo en capas de Adaptive Icon
+        /// queda para la Etapa 13 (arte final de tienda), si hace falta.
+        /// </summary>
+        [MenuItem("Tap Legends/Setup/Set App Icon (Android)")]
+        public static void SetAppIcon()
+        {
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(AppIconPath);
+            if (icon == null)
+            {
+                Debug.LogWarning($"[ProjectSetup] No se encontro {AppIconPath}.");
+                return;
+            }
+
+            var target = BuildTargetGroup.Android;
+            int[] sizes = PlayerSettings.GetIconSizesForTargetGroup(target);
+            var icons = new Texture2D[sizes.Length];
+            for (int i = 0; i < icons.Length; i++) icons[i] = icon;
+            PlayerSettings.SetIconsForTargetGroup(target, icons);
+
+            Debug.Log($"[ProjectSetup] Icono de Android asignado desde {AppIconPath} ({sizes.Length} tamaños).");
         }
     }
 }

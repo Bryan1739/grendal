@@ -45,6 +45,7 @@ namespace TapLegends.Progression
 
             TapUpgradeLevel++;
             EventBus.Publish(new TapDamageUpgradedEvent { NewTapDamage = TapDamage, NewLevel = TapUpgradeLevel });
+            EventBus.Publish(new UpgradePurchasedEvent());
             return true;
         }
 

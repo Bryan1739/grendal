@@ -7,10 +7,11 @@ namespace TapLegends.UI
 {
     /// <summary>
     /// Aparece cuando el jefe de la oleada esta disponible, no hay pelea en curso, Y ya se
-    /// perdio un jefe alguna vez (evt.HasLostBossOnce) — antes de eso, el jefe arranca solo,
-    /// sin boton (ver EnemySpawner). Visibilidad por CanvasGroup, no SetActive: si se
-    /// desactiva el propio GameObject, su OnEnable (donde se suscribe al evento) no vuelve
-    /// a correr para reactivarse solo.
+    /// perdio ESTE jefe alguna vez (evt.HasLostBossOnce) — antes de eso, y en cada ciclo de
+    /// 10 niveles nuevo tras vencer al anterior, el jefe arranca solo, sin boton (ver
+    /// EnemySpawner). Visibilidad por CanvasGroup, no SetActive: si se desactiva el propio
+    /// GameObject, su OnEnable (donde se suscribe al evento) no vuelve a correr para
+    /// reactivarse solo.
     /// </summary>
     [RequireComponent(typeof(Button), typeof(CanvasGroup))]
     public class ChallengeBossButton : MonoBehaviour

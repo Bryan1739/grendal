@@ -143,6 +143,7 @@ namespace TapLegends.Progression
 
             levels[skill] = GetLevel(skill) + 1;
             EventBus.Publish(new SkillChangedEvent { SkillId = skill.id });
+            EventBus.Publish(new UpgradePurchasedEvent());
             return true;
         }
 

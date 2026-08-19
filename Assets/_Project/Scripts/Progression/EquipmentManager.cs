@@ -126,6 +126,7 @@ namespace TapLegends.Progression
             s.fragments -= (int)cost;
             s.level++;
             EventBus.Publish(new EquipmentChangedEvent { EquipmentId = item.id });
+            EventBus.Publish(new UpgradePurchasedEvent());
             return true;
         }
 

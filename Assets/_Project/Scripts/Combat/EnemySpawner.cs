@@ -7,12 +7,14 @@ namespace TapLegends.Combat
 {
     /// <summary>
     /// Genera enemigos comunes sin fin. El nivel se congela en multiplos exactos de
-    /// GameConstants.EnemiesPerStage (10, 20, 30...). La PRIMERA vez que el jefe de cada
-    /// oleada queda disponible, la pelea arranca SOLA (para que el jugador vea el mecanismo
-    /// del temporizador sin tener que descubrir un boton) — recien despues de perder un
-    /// jefe por primera vez, todos los jefes futuros pasan a ser opcionales via
-    /// ChallengeBoss() ("Volver a desafiar al jefe" en la UI). El jefe #1, #11, #21... (cada
-    /// 10 oleadas) es siempre Grendal; el resto sale al azar de bossPool.
+    /// GameConstants.EnemiesPerStage (10, 20, 30...). Cada jefe de oleada arranca su pelea
+    /// SOLO la primera vez que queda disponible (para que el jugador vea el mecanismo del
+    /// temporizador sin tener que descubrir un boton). Si esa pelea se pierde (escapa por
+    /// tiempo), los reintentos de ESE MISMO jefe pasan a ser opcionales via ChallengeBoss()
+    /// ("Volver a desafiar al jefe" en la UI) hasta vencerlo. Vencerlo reinicia el ciclo:
+    /// el proximo jefe (10 niveles despues) vuelve a pelear solo otra vez, sin importar si
+    /// este se gano en el primer intento o al decimo. El jefe #1, #11, #21... (cada 10
+    /// oleadas) es siempre Grendal; el resto sale al azar de bossPool.
     /// </summary>
     public class EnemySpawner : MonoBehaviour
     {
@@ -71,6 +73,17 @@ namespace TapLegends.Combat
             SpawnNext();
         }
 
+        /// <summary>Solo para el menu de debug: vuelve a poner hasLostBossOnce en false sin
+        /// tocar nivel, oro ni ningun otro progreso — sirve para volver a probar el mecanismo
+        /// de "el primer jefe de cada oleada pelea solo" sin tener que borrar la partida
+        /// entera. Si ya hay un jefe disponible esperando, lo activa de inmediato.</summary>
+        public void DebugResetBossAutoFight()
+        {
+            hasLostBossOnce = false;
+            if (bossAvailable && !isBossFight) pendingBossChallenge = true;
+            PublishStageStatus();
+        }
+
         /// <summary>Llamado por el boton "Volver a desafiar al jefe". Devuelve si el desafio arranco.</summary>
         public bool ChallengeBoss()
         {
@@ -117,6 +130,12 @@ namespace TapLegends.Combat
             enemy.OnDied -= HandleEnemyDied;
             bool wasBoss = enemy.IsBoss;
             Destroy(enemy.gameObject, 0.05f);
+            // Limpiar la referencia YA, no cuando el proximo SpawnNext() la reemplace
+            // (~0.25s despues): mientras tanto currentEnemy apunta a un GameObject
+            // destruido, y CurrentEnemyInstance?.OnPointerDown(...) (TapCatcher) SI llama
+            // al metodo igual — el operador ?. compara referencia C# cruda, no respeta el
+            // "fake-null" de UnityEngine.Object, y explota con MissingReferenceException.
+            currentEnemy = null;
 
             if (wasBoss)
             {
@@ -125,6 +144,13 @@ namespace TapLegends.Combat
                 bossAvailable = false;
                 killsInStage = 0;
                 currentLevel++; // arranca la oleada siguiente (11, 21, 31...)
+
+                // Vencer al jefe reinicia el ciclo: el PROXIMO jefe (10 niveles despues)
+                // vuelve a pelear solo, sin importar si este se gano en el primer intento
+                // automatico o despues de varios reintentos opcionales. hasLostBossOnce
+                // describe "ya se perdio ESTE jefe alguna vez", no "algun jefe alguna vez
+                // en toda la partida" — por eso se limpia aca, no solo en Renacer.
+                hasLostBossOnce = false;
             }
             else if (!bossAvailable)
             {
@@ -135,8 +161,9 @@ namespace TapLegends.Combat
                     // incrementa currentLevel en el kill que completa la oleada.
                     bossAvailable = true;
 
-                    // La primera vez que un jefe queda disponible, la pelea arranca sola —
-                    // recien despues de perder un jefe se vuelve opcional (ChallengeBoss()).
+                    // La primera vez que ESTE jefe queda disponible, la pelea arranca sola —
+                    // recien despues de perderlo se vuelve opcional (ChallengeBoss()), y
+                    // vencerlo reinicia hasLostBossOnce para el proximo ciclo (ver HandleEnemyDied).
                     if (!hasLostBossOnce) pendingBossChallenge = true;
                 }
                 else
@@ -187,7 +214,7 @@ namespace TapLegends.Combat
         {
             bossTimerCoroutine = null;
             isBossFight = false;
-            hasLostBossOnce = true; // desde aca en adelante, todos los jefes son opcionales
+            hasLostBossOnce = true; // los reintentos de ESTE jefe son opcionales hasta vencerlo (ver HandleEnemyDied)
 
             if (currentEnemy != null)
             {

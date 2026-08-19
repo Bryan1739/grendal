@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using TapLegends.Combat;
 using TapLegends.Core;
 using TapLegends.Progression;
@@ -9,9 +10,9 @@ namespace TapLegends.EditorTools
 {
     /// <summary>
     /// Crea los ScriptableObjects de arranque (Etapas 0/2/3 del plan): los 3 enemigos
-    /// comunes y el jefe de bioma del Bosque Quebrado, los primeros 3 heroes, mas el
-    /// asset unico de FeatureFlags. Nombres tomados del GDD borrador — cambialos
-    /// libremente, es solo texto en un asset.
+    /// comunes y el jefe de bioma del Bosque Quebrado, los 4 heroes (con retrato real,
+    /// ver Art/Heroes/), mas el asset unico de FeatureFlags. Nombres tomados del GDD
+    /// borrador — cambialos libremente, es solo texto en un asset.
     /// </summary>
     public static class CreateInitialData
     {
@@ -26,6 +27,7 @@ namespace TapLegends.EditorTools
             EnsureFolder("Assets/_Project/Data/Pets");
             EnsureFolder("Assets/_Project/Data/Quests");
             EnsureFolder("Assets/_Project/Data/Achievements");
+            EnsureFolder("Assets/_Project/Data/WeaponSkins");
             EnsureFolder("Assets/_Project/Settings");
 
             CreateEnemy("wolf_corrupt", "Lobo Corrupto", EnemyTier.Common);
@@ -45,14 +47,20 @@ namespace TapLegends.EditorTools
             // dpsGrowth es multiplicativo por nivel (ver analisis L1 en GameConstants.cs) — subido
             // bastante (antes 1.12-1.18) porque con esos valores la mejora por nivel era
             // practicamente imperceptible.
-            // El arma es solo un indicador visual (ver PlaceholderArt.Weapon) para diferenciar
-            // heroes a simple vista mientras no hay arte final.
-            CreateHero("escudero_tomas", "Escudero Tomas", baseCost: 15d, costGrowth: 1.10d, baseDps: 0.5d, dpsGrowth: 1.22d,
-                weapon: WeaponKind.Sword, weaponTint: new Color(0.75f, 0.76f, 0.80f));
-            CreateHero("arquera_lyra", "Arquera Lyra", baseCost: 60d, costGrowth: 1.11d, baseDps: 2d, dpsGrowth: 1.28d,
-                weapon: WeaponKind.Bow, weaponTint: new Color(0.45f, 0.62f, 0.35f));
-            CreateHero("monje_berrin", "Monje Berrin", baseCost: 250d, costGrowth: 1.12d, baseDps: 8d, dpsGrowth: 1.35d,
-                weapon: WeaponKind.Staff, weaponTint: new Color(0.65f, 0.40f, 0.90f));
+            // weapon/weaponTint alimentan el icono chico de arma (PlaceholderArt.Weapon,
+            // sigue siendo procedural) — el retrato principal (artPath) ya es arte real.
+            CreateHero("alice_veloz", "Alice, \"La Veloz\"", baseCost: 15d, costGrowth: 1.10d, baseDps: 0.5d, dpsGrowth: 1.20d,
+                weapon: WeaponKind.Bow, weaponTint: new Color(0.55f, 0.42f, 0.25f),
+                artPath: "Assets/_Project/Art/Heroes/alice_idle.png", attackArtPath: "Assets/_Project/Art/Heroes/alice_attack.png");
+            CreateHero("callu_bueno", "Callu, \"El Bueno\"", baseCost: 50d, costGrowth: 1.11d, baseDps: 1.8d, dpsGrowth: 1.25d,
+                weapon: WeaponKind.Axe, weaponTint: new Color(0.60f, 0.20f, 0.18f),
+                artPath: "Assets/_Project/Art/Heroes/callu_idle.png", attackArtPath: "Assets/_Project/Art/Heroes/callu_attack.png");
+            CreateHero("velaryon_justo", "Velaryon, \"El Justo\"", baseCost: 180d, costGrowth: 1.12d, baseDps: 6d, dpsGrowth: 1.30d,
+                weapon: WeaponKind.Sword, weaponTint: new Color(0.55f, 0.58f, 0.62f),
+                artPath: "Assets/_Project/Art/Heroes/velaryon_idle.png", attackArtPath: "Assets/_Project/Art/Heroes/velaryon_attack.png");
+            CreateHero("ruijerd_dragon", "Ruijerd, \"El Dragón\"", baseCost: 600d, costGrowth: 1.13d, baseDps: 20d, dpsGrowth: 1.35d,
+                weapon: WeaponKind.Dagger, weaponTint: new Color(0.75f, 0.15f, 0.12f),
+                artPath: "Assets/_Project/Art/Heroes/ruijerd_idle.png", attackArtPath: "Assets/_Project/Art/Heroes/ruijerd_attack.png");
 
             // 5 habilidades para los 5 casilleros de la barra (ver TapLegends-Plan.md, Etapa 8).
             // InstantTapBurst/InstantHeroBurst pegan de una; TimedTapBuff/TimedGoldBuff quedan
@@ -60,23 +68,33 @@ namespace TapLegends.EditorTools
             CreateSkill("espadazo", "Espadazo", SkillKind.InstantTapBurst,
                 damageMultiplier: 10d, multiplierGrowth: 1.15d, buffDuration: 0f,
                 cooldown: 8f, baseUpgradeCost: 50d, upgradeCostGrowth: 1.15d,
-                iconWeapon: WeaponKind.Sword, iconColor: new Color(1f, 0.55f, 0.2f));
+                iconWeapon: WeaponKind.Sword, iconColor: new Color(1f, 0.55f, 0.2f),
+                iconPath: "Assets/_Project/Art/Skills/espadazo.png",
+                hotbarIconPath: "Assets/_Project/Art/Skills/espadazo_hotbar.png");
             CreateSkill("golpe_certero", "Golpe Certero", SkillKind.InstantTapBurst,
                 damageMultiplier: 20d, multiplierGrowth: 1.18d, buffDuration: 0f,
                 cooldown: 18f, baseUpgradeCost: 120d, upgradeCostGrowth: 1.18d,
-                iconWeapon: WeaponKind.Dagger, iconColor: new Color(0.85f, 0.85f, 0.95f));
+                iconWeapon: WeaponKind.Dagger, iconColor: new Color(0.85f, 0.85f, 0.95f),
+                iconPath: "Assets/_Project/Art/Skills/golpe_certero.png",
+                hotbarIconPath: "Assets/_Project/Art/Skills/golpe_certero_hotbar.png");
             CreateSkill("lluvia_flechas", "Lluvia de Flechas", SkillKind.InstantHeroBurst,
                 damageMultiplier: 6d, multiplierGrowth: 1.15d, buffDuration: 0f,
                 cooldown: 12f, baseUpgradeCost: 90d, upgradeCostGrowth: 1.16d,
-                iconWeapon: WeaponKind.Bow, iconColor: new Color(0.45f, 0.75f, 0.40f));
+                iconWeapon: WeaponKind.Bow, iconColor: new Color(0.45f, 0.75f, 0.40f),
+                iconPath: "Assets/_Project/Art/Skills/lluvia_flechas.png",
+                hotbarIconPath: "Assets/_Project/Art/Skills/lluvia_flechas_hotbar.png");
             CreateSkill("furia_combate", "Furia de Combate", SkillKind.TimedTapBuff,
                 damageMultiplier: 5d, multiplierGrowth: 1.10d, buffDuration: 10f,
                 cooldown: 35f, baseUpgradeCost: 150d, upgradeCostGrowth: 1.18d,
-                iconWeapon: WeaponKind.Axe, iconColor: new Color(0.90f, 0.25f, 0.20f));
+                iconWeapon: WeaponKind.Axe, iconColor: new Color(0.90f, 0.25f, 0.20f),
+                iconPath: "Assets/_Project/Art/Skills/furia_combate.png",
+                hotbarIconPath: "Assets/_Project/Art/Skills/furia_combate_hotbar.png");
             CreateSkill("bendicion_dorada", "Bendición Dorada", SkillKind.TimedGoldBuff,
                 damageMultiplier: 3d, multiplierGrowth: 1.10d, buffDuration: 20f,
                 cooldown: 45f, baseUpgradeCost: 150d, upgradeCostGrowth: 1.18d,
-                iconWeapon: WeaponKind.Staff, iconColor: new Color(0.95f, 0.80f, 0.20f));
+                iconWeapon: WeaponKind.Staff, iconColor: new Color(0.95f, 0.80f, 0.20f),
+                iconPath: "Assets/_Project/Art/Skills/bendicion_dorada.png",
+                hotbarIconPath: "Assets/_Project/Art/Skills/bendicion_dorada_hotbar.png");
 
             // Mejoras permanentes de prestigio (se compran con reliquias, sobreviven a los
             // Renaceres siguientes). valuePerLevel es el bonus POR NIVEL: 0.05 = +5%.
@@ -103,16 +121,24 @@ namespace TapLegends.EditorTools
             CreateEquipment("amulet_slot", "Amuleto de Aldemark", EquipmentSlot.Amulet, EquipmentEffect.SkillCooldown,
                 valuePerLevel: 0.02d, baseFragmentCost: 4d, fragmentCostGrowth: 1.14d);
 
-            // Mascotas — nombres del GDD. Dracondio Bebe y Grifo Menor atacan solas ademas
-            // del bonus pasivo, el resto solo da bonus (ver PetData.attackDps).
-            CreatePet("lobezno", "Lobezno", PetEffect.TapDamage, baseBonus: 0.06d, bonusGrowth: 1.10d);
-            CreatePet("draconido_bebe", "Dracónido Bebé", PetEffect.TapDamage, baseBonus: 0.05d, bonusGrowth: 1.12d,
-                attackDps: 1d, attackInterval: 4f);
-            CreatePet("buho_sabio", "Búho Sabio", PetEffect.Gold, baseBonus: 0.06d, bonusGrowth: 1.10d);
-            CreatePet("slime_real", "Slime Real", PetEffect.Gold, baseBonus: 0.05d, bonusGrowth: 1.10d);
-            CreatePet("hada_luminosa", "Hada Luminosa", PetEffect.HeroDps, baseBonus: 0.06d, bonusGrowth: 1.10d);
-            CreatePet("grifo_menor", "Grifo Menor", PetEffect.HeroDps, baseBonus: 0.05d, bonusGrowth: 1.12d,
-                attackDps: 1.5d, attackInterval: 3f);
+            // Mascotas con arte real (ver Art/Pets/), reemplazando el roster placeholder
+            // original. Fenrir/Kitsune/Thing atacan solas ademas del bonus pasivo, el resto
+            // solo da bonus (ver PetData.attackDps).
+            CreatePet("fenrir", "Fenrir", PetEffect.TapDamage, baseBonus: 0.06d, bonusGrowth: 1.10d,
+                attackDps: 1d, attackInterval: 4f, artPath: "Assets/_Project/Art/Pets/fenrir_idle.png",
+                attackArtPath: "Assets/_Project/Art/Pets/fenrir_attack.png");
+            CreatePet("kitsune", "Kitsune", PetEffect.Gold, baseBonus: 0.06d, bonusGrowth: 1.10d,
+                artPath: "Assets/_Project/Art/Pets/kitsune_idle.png",
+                attackArtPath: "Assets/_Project/Art/Pets/kitsune_attack.png");
+            CreatePet("thing", "Thing", PetEffect.HeroDps, baseBonus: 0.05d, bonusGrowth: 1.10d,
+                attackDps: 1.5d, attackInterval: 3.5f, artPath: "Assets/_Project/Art/Pets/thing_idle.png",
+                attackArtPath: "Assets/_Project/Art/Pets/thing_attack.png");
+            CreatePet("valeryon_pet", "Valeryon", PetEffect.TapDamage, baseBonus: 0.05d, bonusGrowth: 1.13d,
+                artPath: "Assets/_Project/Art/Pets/valeryon_pet_idle.png",
+                attackArtPath: "Assets/_Project/Art/Pets/valeryon_pet_attack.png");
+            CreatePet("khaos", "Khaos", PetEffect.HeroDps, baseBonus: 0.06d, bonusGrowth: 1.14d,
+                attackDps: 2d, attackInterval: 3f, artPath: "Assets/_Project/Art/Pets/khaos_idle.png",
+                attackArtPath: "Assets/_Project/Art/Pets/khaos_attack.png");
 
             // Pool de misiones diarias: QuestManager elige 3 al azar de estas 8 cada dia.
             // Sin castigo por no completarlas (ver auditoria etica L4 en el plan).
@@ -145,6 +171,15 @@ namespace TapLegends.EditorTools
             CreateAchievementTier("ach_prestige", "Renaceres completados", AchievementCategory.Prestige, AchievementObjective.PrestigeCount,
                 new double[] { 1, 5, 20 }, new double[] { 300, 3000, 30000 });
 
+            // Skins de espada del personaje principal: arte real provisto por el usuario
+            // (recortado de una hoja de sprites), no placeholder. Ver WeaponSkinData.
+            CreateWeaponSkin("espada_madera", "Espada de Madera",
+                "Assets/_Project/Art/Player/EspadaMadera", "Assets/_Project/Art/Player/Icons/espada_madera_icon.png");
+            CreateWeaponSkin("espada_hierro", "Espada de Hierro",
+                "Assets/_Project/Art/Player/EspadaHierro", "Assets/_Project/Art/Player/Icons/espada_hierro_icon.png");
+            CreateWeaponSkin("espada_hierro_negra", "Espada de Hierro Negra",
+                "Assets/_Project/Art/Player/EspadaHierroNegra", "Assets/_Project/Art/Player/Icons/espada_hierro_negra_icon.png");
+
             CreateFeatureFlags();
 
             AssetDatabase.SaveAssets();
@@ -172,7 +207,7 @@ namespace TapLegends.EditorTools
         }
 
         private static void CreateHero(string id, string displayName, double baseCost, double costGrowth,
-            double baseDps, double dpsGrowth, WeaponKind weapon, Color weaponTint)
+            double baseDps, double dpsGrowth, WeaponKind weapon, Color weaponTint, string artPath = null, string attackArtPath = null)
         {
             string path = $"Assets/_Project/Data/Heroes/{id}.asset";
             var data = AssetDatabase.LoadAssetAtPath<HeroData>(path);
@@ -187,14 +222,21 @@ namespace TapLegends.EditorTools
             data.dpsGrowthMultiplier = dpsGrowth;
             data.weaponKind = weapon;
             data.weaponTint = weaponTint;
+            if (!string.IsNullOrEmpty(artPath)) data.art = AssetDatabase.LoadAssetAtPath<Sprite>(artPath);
+            if (!string.IsNullOrEmpty(attackArtPath)) data.attackArt = AssetDatabase.LoadAssetAtPath<Sprite>(attackArtPath);
 
             if (isNew) AssetDatabase.CreateAsset(data, path);
             else EditorUtility.SetDirty(data);
+
+            if (!string.IsNullOrEmpty(artPath) && data.art == null)
+                Debug.LogWarning($"[CreateInitialData] Hero '{id}': no se encontro el sprite en {artPath}.");
+            if (!string.IsNullOrEmpty(attackArtPath) && data.attackArt == null)
+                Debug.LogWarning($"[CreateInitialData] Hero '{id}': no se encontro el sprite en {attackArtPath}.");
         }
 
         private static void CreateSkill(string id, string displayName, SkillKind kind, double damageMultiplier,
             double multiplierGrowth, float buffDuration, float cooldown, double baseUpgradeCost, double upgradeCostGrowth,
-            WeaponKind iconWeapon, Color iconColor)
+            WeaponKind iconWeapon, Color iconColor, string iconPath = null, string hotbarIconPath = null)
         {
             string path = $"Assets/_Project/Data/Skills/{id}.asset";
             var data = AssetDatabase.LoadAssetAtPath<SkillData>(path);
@@ -212,9 +254,16 @@ namespace TapLegends.EditorTools
             data.upgradeCostGrowth = upgradeCostGrowth;
             data.iconWeapon = iconWeapon;
             data.iconColor = iconColor;
+            if (!string.IsNullOrEmpty(iconPath)) data.icon = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            if (!string.IsNullOrEmpty(hotbarIconPath)) data.hotbarIcon = AssetDatabase.LoadAssetAtPath<Sprite>(hotbarIconPath);
 
             if (isNew) AssetDatabase.CreateAsset(data, path);
             else EditorUtility.SetDirty(data);
+
+            if (!string.IsNullOrEmpty(iconPath) && data.icon == null)
+                Debug.LogWarning($"[CreateInitialData] Skill '{id}': no se encontro el sprite en {iconPath}.");
+            if (!string.IsNullOrEmpty(hotbarIconPath) && data.hotbarIcon == null)
+                Debug.LogWarning($"[CreateInitialData] Skill '{id}': no se encontro el sprite de barra en {hotbarIconPath}.");
         }
 
         private static void CreatePrestigeUpgrade(string id, string displayName, PrestigeEffect effect,
@@ -256,8 +305,44 @@ namespace TapLegends.EditorTools
             else EditorUtility.SetDirty(data);
         }
 
+        /// <summary>artFolder tiene que contener idle_NN.png, ataque1_NN.png, ataque2_NN.png,
+        /// ataque3_NN.png (ver Assets/_Project/Art/Player/) — LoadFrames junta cada set
+        /// ordenado por nombre de archivo, que ya viene con padding de 2 digitos.</summary>
+        private static void CreateWeaponSkin(string id, string displayName, string artFolder, string iconPath)
+        {
+            string path = $"Assets/_Project/Data/WeaponSkins/{id}.asset";
+            var data = AssetDatabase.LoadAssetAtPath<WeaponSkinData>(path);
+            bool isNew = data == null;
+            if (isNew) data = ScriptableObject.CreateInstance<WeaponSkinData>();
+
+            data.id = id;
+            data.displayName = displayName;
+            data.icon = AssetDatabase.LoadAssetAtPath<Sprite>(iconPath);
+            data.idleFrames = LoadFrames(artFolder, "idle_");
+            data.attack1Frames = LoadFrames(artFolder, "ataque1_");
+            data.attack2Frames = LoadFrames(artFolder, "ataque2_");
+            data.attack3Frames = LoadFrames(artFolder, "ataque3_");
+
+            if (isNew) AssetDatabase.CreateAsset(data, path);
+            else EditorUtility.SetDirty(data);
+
+            if (data.icon == null || data.idleFrames.Length == 0)
+                Debug.LogWarning($"[CreateInitialData] WeaponSkin '{id}': faltan sprites en {artFolder} o {iconPath}.");
+        }
+
+        private static Sprite[] LoadFrames(string folder, string prefix)
+        {
+            return AssetDatabase.FindAssets("t:Sprite", new[] { folder })
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Where(p => Path.GetFileNameWithoutExtension(p).StartsWith(prefix))
+                .OrderBy(p => p)
+                .Select(AssetDatabase.LoadAssetAtPath<Sprite>)
+                .Where(s => s != null)
+                .ToArray();
+        }
+
         private static void CreatePet(string id, string displayName, PetEffect effect, double baseBonus, double bonusGrowth,
-            double attackDps = 0d, float attackInterval = 3f)
+            double attackDps = 0d, float attackInterval = 3f, string artPath = null, string attackArtPath = null)
         {
             string path = $"Assets/_Project/Data/Pets/{id}.asset";
             var data = AssetDatabase.LoadAssetAtPath<PetData>(path);
@@ -271,9 +356,16 @@ namespace TapLegends.EditorTools
             data.bonusGrowthPerLevel = bonusGrowth;
             data.attackDps = attackDps;
             data.attackInterval = attackInterval;
+            if (!string.IsNullOrEmpty(artPath)) data.art = AssetDatabase.LoadAssetAtPath<Sprite>(artPath);
+            if (!string.IsNullOrEmpty(attackArtPath)) data.attackArt = AssetDatabase.LoadAssetAtPath<Sprite>(attackArtPath);
 
             if (isNew) AssetDatabase.CreateAsset(data, path);
             else EditorUtility.SetDirty(data);
+
+            if (!string.IsNullOrEmpty(artPath) && data.art == null)
+                Debug.LogWarning($"[CreateInitialData] Pet '{id}': no se encontro el sprite en {artPath}.");
+            if (!string.IsNullOrEmpty(attackArtPath) && data.attackArt == null)
+                Debug.LogWarning($"[CreateInitialData] Pet '{id}': no se encontro el sprite de ataque en {attackArtPath}.");
         }
 
         private static void CreateQuest(string id, string description, QuestObjective objective, double target, double rewardGold)

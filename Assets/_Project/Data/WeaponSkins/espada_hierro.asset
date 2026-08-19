@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b76d32b6ce875b4887dfd8685accf15, type: 3}
+  m_Name: espada_hierro
+  m_EditorClassIdentifier: Assembly-CSharp::TapLegends.Progression.WeaponSkinData
+  id: espada_hierro
+  displayName: Espada de Hierro
+  icon: {fileID: 21300000, guid: db81cb2ff2ab3bc4489e0b0b9817ffb4, type: 3}
+  idleFrames:
+  - {fileID: 21300000, guid: 72a57e56a3c50b64880072a48aba6c3d, type: 3}
+  - {fileID: 21300000, guid: 32bb91ec450219d43a848a23c287be8d, type: 3}
+  - {fileID: 21300000, guid: ec90578044bb1584c8b9d4872303968c, type: 3}
+  - {fileID: 21300000, guid: 173fae0f46ffadf4b935174115d10c75, type: 3}
+  attack1Frames:
+  - {fileID: 21300000, guid: ce8d268cb2cf024449a7d193686605fc, type: 3}
+  - {fileID: 21300000, guid: 68f1420d61535c2499f8e1255ce65172, type: 3}
+  - {fileID: 21300000, guid: 2cbb643cb1e52904d8e9d6d58bc42387, type: 3}
+  - {fileID: 21300000, guid: 403cd9d8371d234409252b655d4ac958, type: 3}
+  attack2Frames:
+  - {fileID: 21300000, guid: a50e02881dbad404fa04d55e105b5945, type: 3}
+  - {fileID: 21300000, guid: a8c76d0aff8b24748bd0b1f323ee77b0, type: 3}
+  - {fileID: 21300000, guid: eab58755938574b47b7d74080ede294d, type: 3}
+  - {fileID: 21300000, guid: f4227009aead37e43a1e7142d1ec8bdc, type: 3}
+  attack3Frames:
+  - {fileID: 21300000, guid: 6c42e8e50f2dc714fa2f4463c79b80a3, type: 3}
+  - {fileID: 21300000, guid: d00c1322506a4614eb20c3d063e6e3cf, type: 3}
+  - {fileID: 21300000, guid: 338c7194ea2654c4f8c419e24bbdc77a, type: 3}
+  - {fileID: 21300000, guid: 49fdee92b447d9e44ae3e3b9a318cd75, type: 3}

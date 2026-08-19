@@ -10,6 +10,7 @@ namespace TapLegends.UI
     public class SkillUpgradeButton : MonoBehaviour
     {
         [SerializeField] private Text label;
+        [SerializeField] private Image icon;
         [SerializeField] private SkillData skill;
 
         private Button button;
@@ -45,6 +46,8 @@ namespace TapLegends.UI
         private void Refresh()
         {
             if (skill == null || label == null || SkillManager.Instance == null) return;
+
+            if (icon != null) icon.sprite = skill.Icon;
 
             int level = SkillManager.Instance.GetLevel(skill);
             double cost = SkillManager.Instance.GetUpgradeCost(skill);

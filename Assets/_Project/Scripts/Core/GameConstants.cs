@@ -62,8 +62,20 @@ namespace TapLegends.Core
 
         // --- Guardado y progreso offline (Etapa 4) ---
         public const float AutosaveIntervalSeconds = 30f;
-        public const float MaxOfflineSeconds = 8 * 3600f; // tope de 8h, ver TapLegends-Plan.md
-        public const double OfflineDpsFactor = 0.5d; // los heroes rinden la mitad offline que en pantalla
+
+        // Subido de 8h a 16h: 8h no alcanza a cubrir "me fui a dormir y trabajar" (las dos
+        // ausencias tipicas que se supone que este sistema premia), asi que el jugador
+        // sentia que tenia que volver a horario fijo para no "perder" horas — el efecto
+        // contrario al buscado (ver docs/ludo/L4-economia-offline.md).
+        public const float MaxOfflineSeconds = 16 * 3600f;
+
+        // Subido de 0.5 a 0.65: activo sigue rindiendo mas que offline (agencia real, ver
+        // L3), pero la brecha era mayor de lo necesario, sobre todo compuesta con el bug
+        // de GoldPerDamageAtLevel corregido en GameManager.cs (el oro offline no aplicaba
+        // Prestigio/Equipo/Mascotas, asi que la brecha se agrandaba cuanto mas invertia el
+        // jugador — justo lo contrario de lo que un jugador de progreso avanzado deberia
+        // sentir al volver).
+        public const double OfflineDpsFactor = 0.65d;
 
         // --- Prestigio (Etapa 5) ---
         public const int PrestigeMinLevel = 30; // ver TapLegends-Plan.md, Etapa 5
@@ -71,5 +83,13 @@ namespace TapLegends.Core
         // Reliquias ganadas = 5 * (nivelMaximo/15)^1.4 — formula de arranque del plan.
         public static double RelicsForLevel(int maxLevel) =>
             maxLevel < PrestigeMinLevel ? 0d : 5d * System.Math.Pow(maxLevel / 15d, 1.4d);
+
+        // --- Desbloqueo progresivo de sistemas (Etapa 10) ---
+        // No mostrar las 6 pestañas desde el nivel 1: un jugador nuevo con todo a la vista
+        // a la vez es la causa mas comun de abandono temprano (ver TapLegends-Plan.md, L5).
+        // Prestigio ya usa PrestigeMinLevel como su propio umbral, no hace falta duplicarlo.
+        public const int HeroesUnlockLevel = 3;
+        public const int EquipmentUnlockLevel = 8;
+        public const int PetsUnlockLevel = 15;
     }
 }

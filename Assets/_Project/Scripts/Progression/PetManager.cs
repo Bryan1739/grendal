@@ -28,9 +28,14 @@ namespace TapLegends.Progression
         }
 
         private readonly Dictionary<PetData, PetState> state = new Dictionary<PetData, PetState>();
-        private float attackTimer;
 
-        public PetData ActivePet { get; private set; }
+        // Hasta 2 mascotas activas a la vez, una a cada lado del heroe (pedido del usuario:
+        // antes solo se podia tener 1 activa). Slot 0 = izquierda, slot 1 = derecha (ver
+        // PetFieldSprite/SceneBuilder) — el indice en si no tiene significado de gameplay,
+        // solo posicion en pantalla.
+        private readonly PetData[] activeSlots = new PetData[2];
+        private readonly float[] attackTimers = new float[2];
+
         public IReadOnlyList<PetData> Pets => pets;
 
         public void Configure(PetData[] roster) => pets = roster ?? System.Array.Empty<PetData>();
@@ -57,14 +62,18 @@ namespace TapLegends.Progression
 
         private void Update()
         {
-            if (ActivePet == null || ActivePet.attackDps <= 0d) return;
+            for (int i = 0; i < activeSlots.Length; i++)
+            {
+                var pet = activeSlots[i];
+                if (pet == null || pet.attackDps <= 0d) continue;
 
-            attackTimer += Time.deltaTime;
-            if (attackTimer < ActivePet.attackInterval) return;
-            attackTimer = 0f;
+                attackTimers[i] += Time.deltaTime;
+                if (attackTimers[i] < pet.attackInterval) continue;
+                attackTimers[i] = 0f;
 
-            double damage = ActivePet.attackDps * System.Math.Max(1, GetLevel(ActivePet));
-            EnemySpawner.Instance?.CurrentEnemyInstance?.TakeDamage(damage);
+                double damage = pet.attackDps * System.Math.Max(1, GetLevel(pet));
+                EnemySpawner.Instance?.CurrentEnemyInstance?.TakeDamage(damage);
+            }
         }
 
         private PetState GetState(PetData pet)
@@ -97,7 +106,7 @@ namespace TapLegends.Progression
             foreach (var pet in pets)
             {
                 if (pet == null || pet.effect != effect || !IsOwned(pet)) continue;
-                double factor = pet == ActivePet ? 1d : 0.2d; // ver TapLegends-Plan.md, Etapa 7
+                double factor = IsActive(pet) ? 1d : 0.2d; // ver TapLegends-Plan.md, Etapa 7
                 total += GetBonusPercent(pet) * factor;
             }
             return total;
@@ -107,11 +116,31 @@ namespace TapLegends.Progression
         public double TapDamageMultiplier => 1d + SumBonus(PetEffect.TapDamage);
         public double HeroDpsMultiplier => 1d + SumBonus(PetEffect.HeroDps);
 
+        public bool IsActive(PetData pet) => pet != null && (activeSlots[0] == pet || activeSlots[1] == pet);
+
+        /// <summary>Mascota activa en un lado (0 = izquierda, 1 = derecha) o null si ese
+        /// lado esta vacio — ver PetFieldSprite.</summary>
+        public PetData GetActiveSlot(int slot) => slot >= 0 && slot < activeSlots.Length ? activeSlots[slot] : null;
+
+        /// <summary>Alterna la mascota: si ya esta activa, la desequipa (libera su lado). Si
+        /// no, la equipa en el primer lado libre — si los 2 estan ocupados, reemplaza el
+        /// lado 0. Un solo boton "Activar" por mascota (no hay UI para elegir lado a mano;
+        /// el usuario solo pidio poder tener hasta 2 a la vez, no eligiendo posicion).</summary>
         public void SetActive(PetData pet)
         {
-            if (pet == null || !IsOwned(pet) || ActivePet == pet) return;
-            ActivePet = pet;
-            attackTimer = 0f;
+            if (pet == null || !IsOwned(pet)) return;
+
+            for (int i = 0; i < activeSlots.Length; i++)
+            {
+                if (activeSlots[i] != pet) continue;
+                activeSlots[i] = null;
+                EventBus.Publish(new PetChangedEvent { PetId = pet.id });
+                return;
+            }
+
+            int freeSlot = activeSlots[0] == null ? 0 : activeSlots[1] == null ? 1 : 0;
+            activeSlots[freeSlot] = pet;
+            attackTimers[freeSlot] = 0f;
             EventBus.Publish(new PetChangedEvent { PetId = pet.id });
         }
 
@@ -126,6 +155,7 @@ namespace TapLegends.Progression
             s.fragments -= (int)cost;
             s.level++;
             EventBus.Publish(new PetChangedEvent { PetId = pet.id });
+            EventBus.Publish(new UpgradePurchasedEvent());
             return true;
         }
 
@@ -142,7 +172,9 @@ namespace TapLegends.Progression
             {
                 s.owned = true;
                 s.level = 1;
-                if (ActivePet == null) ActivePet = pet; // la primera mascota se activa sola
+                // La primera mascota se activa sola (en el primer lado libre).
+                if (activeSlots[0] == null) activeSlots[0] = pet;
+                else if (activeSlots[1] == null) activeSlots[1] = pet;
             }
             else
             {
@@ -165,12 +197,13 @@ namespace TapLegends.Progression
             foreach (var pet in pets)
             {
                 if (pet == null || !state.TryGetValue(pet, out var s) || !s.owned) continue;
+                int slot = activeSlots[0] == pet ? 0 : activeSlots[1] == pet ? 1 : -1;
                 entries.Add(new PetSaveEntry
                 {
                     petId = pet.id,
                     level = s.level,
                     fragments = s.fragments,
-                    isActive = pet == ActivePet,
+                    activeSlot = slot,
                 });
             }
             return entries;
@@ -185,7 +218,7 @@ namespace TapLegends.Progression
                 if (pet == null) continue;
 
                 state[pet] = new PetState { owned = true, level = entry.level, fragments = entry.fragments };
-                if (entry.isActive) ActivePet = pet;
+                if (entry.activeSlot == 0 || entry.activeSlot == 1) activeSlots[entry.activeSlot] = pet;
 
                 EventBus.Publish(new PetChangedEvent { PetId = pet.id });
             }

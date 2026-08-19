@@ -1,3 +1,4 @@
+using TapLegends.Core;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -6,7 +7,8 @@ namespace TapLegends.UI
     /// <summary>
     /// Pestañas Mejoras/Heroes/Equipo/Mascotas/Prestigio + colapso del panel inferior a
     /// una tira delgada, para liberar pantalla y ver mejor a los heroes/mascota alrededor
-    /// del monstruo.
+    /// del monstruo. Heroes/Equipo/Mascotas/Prestigio ademas se desbloquean por nivel
+    /// (Etapa 10, ver GameConstants) para no mostrar las 5 pestañas desde el nivel 1.
     /// </summary>
     public class BottomTabController : MonoBehaviour
     {
@@ -28,11 +30,24 @@ namespace TapLegends.UI
         [SerializeField] private GameObject tabBar;
         [SerializeField] private Button collapseButton;
         [SerializeField] private Text collapseLabel;
-        [SerializeField] private float expandedAnchorY = 0.34f;
+        // Antes 0.34 (mucho mas alto que los pies del personaje, en BottomPanelHeightFraction
+        // = 0.28 de SceneBuilder) — bajado primero a 0.28 para que coincidiera exacto con
+        // los pies. El usuario reporto que TODAVIA quedaba muy pegado: no alcanza con que el
+        // borde del panel llegue justo a los pies, hay que dejar los CUADROS de mejora
+        // (adentro del panel, con su propio margen para el tab bar) claramente por debajo
+        // del personaje completo, no solo de sus pies. Bajado otro tramo mas para dejar ese
+        // aire visible.
+        [SerializeField] private float expandedAnchorY = 0.22f;
         [SerializeField] private float collapsedAnchorY = 0.03f; // ~36px de handle sobre 1280 de referencia
 
         private Tab activeTab = Tab.Upgrades;
         private bool isExpanded = true;
+
+        private bool heroesUnlocked;
+        private bool equipmentUnlocked;
+        private bool petsUnlocked;
+        private bool prestigeUnlocked;
+        private bool receivedFirstStatus;
 
         private void Awake()
         {
@@ -47,6 +62,47 @@ namespace TapLegends.UI
             if (collapseButton != null) collapseButton.onClick.AddListener(ToggleCollapse);
 
             Apply();
+        }
+
+        private void OnEnable() => EventBus.Subscribe<StageStatusEvent>(HandleStageStatus);
+        private void OnDisable() => EventBus.Unsubscribe<StageStatusEvent>(HandleStageStatus);
+
+        private void HandleStageStatus(StageStatusEvent evt)
+        {
+            bool wasHeroes = heroesUnlocked;
+            bool wasEquipment = equipmentUnlocked;
+            bool wasPets = petsUnlocked;
+            bool wasPrestige = prestigeUnlocked;
+
+            heroesUnlocked = evt.Level >= GameConstants.HeroesUnlockLevel;
+            equipmentUnlocked = evt.Level >= GameConstants.EquipmentUnlockLevel;
+            petsUnlocked = evt.Level >= GameConstants.PetsUnlockLevel;
+            prestigeUnlocked = evt.Level >= GameConstants.PrestigeMinLevel;
+
+            // El primer StageStatusEvent de la sesion (partida nueva o cargada) solo fija el
+            // estado inicial, sin avisar: no es un desbloqueo "nuevo" si ya estaba desbloqueado
+            // en una partida guardada.
+            if (receivedFirstStatus)
+            {
+                if (heroesUnlocked && !wasHeroes) Announce("Heroes");
+                if (equipmentUnlocked && !wasEquipment) Announce("Equipo");
+                if (petsUnlocked && !wasPets) Announce("Mascotas");
+                if (prestigeUnlocked && !wasPrestige) Announce("Prestigio");
+            }
+            receivedFirstStatus = true;
+
+            ApplyTabVisibility();
+        }
+
+        private static void Announce(string systemName) =>
+            EventBus.Publish(new SystemUnlockedEvent { SystemName = systemName });
+
+        private void ApplyTabVisibility()
+        {
+            if (heroesTabButton != null) heroesTabButton.gameObject.SetActive(heroesUnlocked);
+            if (equipmentTabButton != null) equipmentTabButton.gameObject.SetActive(equipmentUnlocked);
+            if (petsTabButton != null) petsTabButton.gameObject.SetActive(petsUnlocked);
+            if (prestigeTabButton != null) prestigeTabButton.gameObject.SetActive(prestigeUnlocked);
         }
 
         public void ShowUpgrades()

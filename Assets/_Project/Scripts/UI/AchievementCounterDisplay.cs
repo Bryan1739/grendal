@@ -5,7 +5,9 @@ using UnityEngine.UI;
 
 namespace TapLegends.UI
 {
-    /// <summary>Contador chico "Logros: X/Y" — visible siempre, sin abrir el modal.</summary>
+    /// <summary>Contador chico "X/Y" — visible siempre, sin abrir el modal. El botón ya
+    /// muestra el ícono real con "LOGROS" horneado adentro (ver SceneBuilder), así que este
+    /// texto se redujo a solo el número — antes decía "Logros: X/Y", repetía la palabra.</summary>
     public class AchievementCounterDisplay : MonoBehaviour
     {
         [SerializeField] private Text counterText;
@@ -23,7 +25,7 @@ namespace TapLegends.UI
         private void Refresh()
         {
             if (counterText == null || AchievementManager.Instance == null) return;
-            counterText.text = $"Logros: {AchievementManager.Instance.UnlockedCount}/{AchievementManager.Instance.TotalCount}";
+            counterText.text = $"{AchievementManager.Instance.UnlockedCount}/{AchievementManager.Instance.TotalCount}";
         }
     }
 }

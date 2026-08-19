@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4828e59621817644a630e62028bd4f4, type: 3}
+  m_Name: velaryon_justo
+  m_EditorClassIdentifier: TapLegends.Runtime::TapLegends.Progression.HeroData
+  id: velaryon_justo
+  displayName: Velaryon, "El Justo"
+  baseCost: 180
+  costGrowth: 1.12
+  baseDps: 6
+  dpsGrowthMultiplier: 1.3
+  art: {fileID: 21300000, guid: f35e7652d92d71c4999fe97039c6de55, type: 3}
+  attackArt: {fileID: 21300000, guid: fab7854f79edcdf4680312dfbd3957af, type: 3}
+  weaponKind: 0
+  weaponTint: {r: 0.55, g: 0.58, b: 0.62, a: 1}
+  weaponIconOverride: {fileID: 0}

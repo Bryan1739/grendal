@@ -72,6 +72,7 @@ namespace TapLegends.Combat
         public void OnPointerDown(PointerEventData eventData)
         {
             if (isDead || PlayerStats.Instance == null) return;
+            EventBus.Publish(new PlayerTappedEvent());
             TakeDamage(PlayerStats.Instance.TapDamage, eventData.position);
         }
 
@@ -124,6 +125,11 @@ namespace TapLegends.Combat
             if (SkillManager.Instance != null) gold *= SkillManager.Instance.GoldBuffMultiplier;
 
             if (GoldWallet.Instance != null) GoldWallet.Instance.Add(gold);
+
+            // Vibra en la muerte, no en cada tap: un buzz por toque en un tapper es
+            // molesto de verdad (varios toques por segundo), la muerte es el momento
+            // que si vale la pena reforzar.
+            if (SettingsManager.VibrationEnabled) Handheld.Vibrate();
 
             EventBus.Publish(new EnemyKilledEvent
             {

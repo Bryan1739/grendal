@@ -23,4 +23,5 @@ MonoBehaviour:
   upgradeCostGrowth: 1.18
   iconWeapon: 4
   iconColor: {r: 0.9, g: 0.25, b: 0.2, a: 1}
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: e9f6f69639df7cc42827865216cb0a86, type: 3}
+  hotbarIcon: {fileID: 21300000, guid: 82e1eb0a987ceab4ead8f37668ae838e, type: 3}

@@ -34,12 +34,22 @@ namespace TapLegends.UI
         private void OnEnable()
         {
             EventBus.Subscribe<PetChangedEvent>(HandleChanged);
+            EventBus.Subscribe<SkinChangedEvent>(HandleSkinChanged);
             Refresh();
         }
 
-        private void OnDisable() => EventBus.Unsubscribe<PetChangedEvent>(HandleChanged);
+        private void OnDisable()
+        {
+            EventBus.Unsubscribe<PetChangedEvent>(HandleChanged);
+            EventBus.Unsubscribe<SkinChangedEvent>(HandleSkinChanged);
+        }
 
         private void HandleChanged(PetChangedEvent evt) => Refresh();
+
+        private void HandleSkinChanged(SkinChangedEvent evt)
+        {
+            if (pet != null && (string.IsNullOrEmpty(evt.CharacterId) || evt.CharacterId == pet.id)) Refresh();
+        }
 
         private void HandleUpgradeClick() => PetManager.Instance?.TryUpgrade(pet);
         private void HandleActivateClick() => PetManager.Instance?.SetActive(pet);
@@ -49,7 +59,11 @@ namespace TapLegends.UI
             if (pet == null || label == null || PetManager.Instance == null) return;
 
             bool owned = PetManager.Instance.IsOwned(pet);
-            if (icon != null) icon.color = owned ? Color.white : new Color(1f, 1f, 1f, 0.15f);
+            if (icon != null)
+            {
+                icon.sprite = pet.Art;
+                icon.color = owned ? Color.white : new Color(1f, 1f, 1f, 0.15f);
+            }
 
             if (!owned)
             {
@@ -60,7 +74,7 @@ namespace TapLegends.UI
                 return;
             }
 
-            bool isActive = PetManager.Instance.ActivePet == pet;
+            bool isActive = PetManager.Instance.IsActive(pet);
             int level = PetManager.Instance.GetLevel(pet);
             int fragments = PetManager.Instance.GetFragments(pet);
             double cost = PetManager.Instance.GetUpgradeCost(pet);
@@ -78,8 +92,13 @@ namespace TapLegends.UI
                          $"Fragmentos: {fragments}/{NumberFormatter.Format(cost)}";
             upgradeButton.interactable = fragments >= cost;
 
-            if (activateButton != null) activateButton.interactable = !isActive;
-            if (activateLabel != null) activateLabel.text = isActive ? "Activa" : "Activar";
+            // El boton ahora ALTERNA (hasta 2 mascotas activas a la vez, una a cada lado —
+            // ver PetManager.SetActive): activa si estaba libre, desactiva si ya estaba
+            // activa. Antes se deshabilitaba estando activa porque solo habia 1 slot y no
+            // tenia sentido "reactivarla"; ahora hace falta poder soltarla para liberar un
+            // lado.
+            if (activateButton != null) activateButton.interactable = true;
+            if (activateLabel != null) activateLabel.text = isActive ? "Quitar" : "Activar";
         }
     }
 }

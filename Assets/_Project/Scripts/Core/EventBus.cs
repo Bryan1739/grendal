@@ -101,6 +101,18 @@ namespace TapLegends.Core
     /// el fracaso tiene que leerse como informativo, no como un reseteo silencioso.</summary>
     public struct BossEscapedEvent { }
 
+    /// <summary>El jugador toco a un enemigo vivo (Enemy.OnPointerDown) — solo para el
+    /// sonido de tap (SfxManager). No confundir con TakeDamage: el DPS pasivo de heroes
+    /// tambien llama TakeDamage pero no es un tap del jugador, no publica esto.</summary>
+    public struct PlayerTappedEvent { }
+
+    /// <summary>Se completo una compra que sube de nivel algo (daño de tap, habilidad,
+    /// heroe, equipo, mascota, mejora de prestigio) — solo para el sonido de mejora
+    /// (SfxManager). Se publica junto al evento propio de cada sistema, solo en el metodo
+    /// de compra real: nunca en LoadState/ResetAll/SetActive/loot de jefe, que reusan el
+    /// mismo evento de "cambio" de cada sistema por otros motivos.</summary>
+    public struct UpgradePurchasedEvent { }
+
     /// <summary>Se mejoro una habilidad. SkillId en vez de la referencia al ScriptableObject,
     /// mismo criterio que HeroChangedEvent.</summary>
     public struct SkillChangedEvent
@@ -174,4 +186,27 @@ namespace TapLegends.Core
         public string DisplayName;
         public double RewardGold;
     }
+
+    /// <summary>Un sistema (Heroes, Equipo, Mascotas, Prestigio) paso de bloqueado a
+    /// disponible por nivel — Etapa 10, desbloqueo progresivo. Solo se publica en la
+    /// transicion real, nunca al cargar una partida que ya lo tenia desbloqueado.</summary>
+    public struct SystemUnlockedEvent
+    {
+        public string SystemName;
+    }
+
+    /// <summary>Cambio el nombre o la presentacion del perfil.</summary>
+    public struct ProfileChangedEvent { }
+
+    /// <summary>Cambio la skin de un personaje (personaje principal, un heroe o una
+    /// mascota). CharacterId vacio = "revisa todo", usado al cargar partida (ver
+    /// ProfileManager.LoadState) para no publicar un evento por cada skin guardada.</summary>
+    public struct SkinChangedEvent
+    {
+        public string CharacterId;
+    }
+
+    /// <summary>Cambio la skin de espada elegida (WeaponSkinManager) — PlayerAnimator
+    /// vuelve a cargar el set de animacion desde el idle.</summary>
+    public struct WeaponSkinChangedEvent { }
 }

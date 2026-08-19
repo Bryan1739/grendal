@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using TapLegends.Combat;
 using TapLegends.Progression;
+using TapLegends.UI;
 using UnityEngine;
 
 namespace TapLegends.Core
@@ -54,6 +55,10 @@ namespace TapLegends.Core
             PetManager.Instance?.LoadState(data.pets);
             QuestManager.Instance?.LoadState(data.quests);
             AchievementManager.Instance?.LoadState(data.achievements);
+            TutorialManager.Instance?.LoadState(data.tutorialCompleted);
+            ProfileManager.Instance?.LoadState(data.profileUsername, data.profileBio, data.profileSkins);
+            WeaponSkinManager.Instance?.LoadState(data.weaponSkinId);
+            BackgroundController.Instance?.LoadState(data.backgroundChapter, data.backgroundOrder, data.backgroundPosition);
 
             float secondsAway = ComputeElapsedSeconds(data);
             double offlineGold = ComputeOfflineGold(data, secondsAway);
@@ -88,10 +93,28 @@ namespace TapLegends.Core
             if (dps <= 0d) return 0d;
 
             int level = Mathf.Max(1, data.enemyLevel);
-            double health = GameConstants.EnemyHealthForLevel(level);
-            double goldPerDamage = health > 0d ? GameConstants.EnemyGoldForLevel(level) / health : 0d;
+            return dps * secondsAway * GameConstants.OfflineDpsFactor * GoldPerDamageAtLevel(level);
+        }
 
-            return dps * secondsAway * GameConstants.OfflineDpsFactor * goldPerDamage;
+        /// <summary>Oro por punto de daño al nivel dado, con los MISMOS multiplicadores
+        /// pasivos que ya aplica un kill activo (ver Enemy.Die): Prestigio, Equipo,
+        /// Mascotas. A proposito NO incluye SkillManager.GoldBuffMultiplier (Bendicion
+        /// Dorada): es un buff temporal de sesion activa, no una tasa permanente que tenga
+        /// sentido seguir aplicando con la app cerrada. Ver docs/ludo/L4-economia-offline.md —
+        /// sin esto, el oro offline se quedaba en la tasa BASE mientras el oro activo ya
+        /// se beneficiaba de estos 3 multiplicadores, y la brecha entre "jugar activo" y
+        /// "dejar el juego" se agrandaba cuanto mas invertia el jugador en esos sistemas.</summary>
+        private static double GoldPerDamageAtLevel(int level)
+        {
+            double health = GameConstants.EnemyHealthForLevel(level);
+            if (health <= 0d) return 0d;
+
+            double gold = GameConstants.EnemyGoldForLevel(level);
+            if (PrestigeManager.Instance != null) gold *= PrestigeManager.Instance.GoldMultiplier;
+            if (EquipmentManager.Instance != null) gold *= EquipmentManager.Instance.GoldMultiplier;
+            if (PetManager.Instance != null) gold *= PetManager.Instance.GoldMultiplier;
+
+            return gold / health;
         }
 
         private IEnumerator AutosaveRoutine()
@@ -115,6 +138,14 @@ namespace TapLegends.Core
                 enemyLevel = EnemySpawner.Instance.CurrentLevel,
                 killsInStage = EnemySpawner.Instance.KillsInStage,
                 hasLostBossOnce = EnemySpawner.Instance.HasLostBossOnce,
+                tutorialCompleted = TutorialManager.Instance != null && TutorialManager.Instance.IsCompleted,
+                profileUsername = ProfileManager.Instance != null ? ProfileManager.Instance.Username : "",
+                profileBio = ProfileManager.Instance != null ? ProfileManager.Instance.Bio : "",
+                profileSkins = ProfileManager.Instance != null ? ProfileManager.Instance.GetSaveEntries() : new List<SkinSaveEntry>(),
+                weaponSkinId = WeaponSkinManager.Instance != null ? WeaponSkinManager.Instance.GetSaveId() : "",
+                backgroundChapter = BackgroundController.Instance != null ? BackgroundController.Instance.Chapter : 0,
+                backgroundOrder = BackgroundController.Instance != null ? BackgroundController.Instance.GetSaveOrder() ?? new List<int>() : new List<int>(),
+                backgroundPosition = BackgroundController.Instance != null ? BackgroundController.Instance.GetSavePosition() : 0,
                 heroes = HeroRoster.Instance != null ? HeroRoster.Instance.GetSaveEntries() : new List<HeroSaveEntry>(),
                 skills = SkillManager.Instance != null ? SkillManager.Instance.GetSaveEntries() : new List<SkillSaveEntry>(),
                 relics = PrestigeManager.Instance != null ? PrestigeManager.Instance.Relics : 0d,
@@ -148,10 +179,7 @@ namespace TapLegends.Core
             double dps = HeroRoster.Instance.TotalDps;
             if (dps <= 0d) return;
 
-            int level = EnemySpawner.Instance.CurrentLevel;
-            double health = GameConstants.EnemyHealthForLevel(level);
-            double goldPerDamage = health > 0d ? GameConstants.EnemyGoldForLevel(level) / health : 0d;
-            double gold = dps * seconds * GameConstants.OfflineDpsFactor * goldPerDamage;
+            double gold = dps * seconds * GameConstants.OfflineDpsFactor * GoldPerDamageAtLevel(EnemySpawner.Instance.CurrentLevel);
             if (gold <= 0d) return;
 
             GoldWallet.Instance?.Add(gold);
